@@ -6,7 +6,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -32,58 +35,84 @@ public class MainApacheVersion {
             while (mGlobal.find()) {
                 urlIDs.add(mGlobal.group(1));
             }
-            for (int i = 0; i < urlIDs.size(); i++) {
-                HttpGet get = new HttpGet("http://www.mephist.ru/mephist/prepods.nsf/id/"+ urlIDs.get(i));
-                try (CloseableHttpResponse resp = client.execute(get)) {
-                    String html = EntityUtils.toString(resp.getEntity());
-                    //System.out.print(html);
-                    //Pattern p = Pattern.compile("http://\\S+");
+            try (Writer w = new OutputStreamWriter(new FileOutputStream("prepods2.csv"), "cp1251")) {
+                for (int i = 389; i < urlIDs.size(); i++) {
+                    HttpGet get = new HttpGet("http://www.mephist.ru/mephist/prepods.nsf/id/" + urlIDs.get(i));
+                    try (CloseableHttpResponse resp = client.execute(get)) {
+                        String html = EntityUtils.toString(resp.getEntity());
+                        //System.out.print(html);
+                        //Pattern p = Pattern.compile("http://\\S+");
 
-                    Pattern p = Pattern.compile("<title>Преподаватель МИФИ (.*) — MEPHIST.ru — Портал студентов и выпускников МИФИ</title>");
-                    Matcher m = p.matcher(html);
-                    while (m.find()) {
-                        System.out.print(m.group(1) + ", ");
+                        Pattern p = Pattern.compile("<title>Преподаватель МИФИ (.*) — MEPHIST.ru — Портал студентов и выпускников МИФИ</title>");
+                        Matcher m = p.matcher(html);
+                        while (m.find()) {
+
+                            w.write(m.group(1) + ", ");
+
+                            System.out.print(m.group(1) + ", ");
+                        }
+                        p = Pattern.compile("Характер.*span.*id.*>\\s*(-?\\d\\.?\\d?\\d?)\\s*<.*голос");
+                        m = p.matcher(html);
+                        while (m.find()) {
+
+                            w.write(m.group(1) + ", ");
+
+                            System.out.print(m.group(1) + ", ");
+                        }
+                        p = Pattern.compile("Качество.*span.*id.*>\\s*(-?\\d\\.?\\d?\\d?)\\s*<.*голос");
+                        m = p.matcher(html);
+                        while (m.find()) {
+
+                            w.write(m.group(1) + ", ");
+
+                            System.out.print(m.group(1) + ", ");
+                        }
+                        p = Pattern.compile("Приём.*span.*id.*>\\s*(-?\\d\\.?\\d?\\d?)\\s*<.*голос");
+                        m = p.matcher(html);
+                        while (m.find()) {
+
+                            w.write(m.group(1) + ", ");
+
+                            System.out.print(m.group(1) + ", ");
+                        }
+                        p = Pattern.compile("Характер.*голос.*?(\\d+)");
+                        m = p.matcher(html);
+                        while (m.find()) {
+
+                            w.write(m.group(1) + ", ");
+
+                            System.out.print(m.group(1) + ", ");
+                        }
+                        p = Pattern.compile("Качество.*голос.*?(\\d+)");
+                        m = p.matcher(html);
+                        while (m.find()) {
+
+                            w.write(m.group(1) + ", ");
+
+                            System.out.print(m.group(1) + ", ");
+                        }
+                        p = Pattern.compile("Приём.*голос.*?(\\d+)");
+                        m = p.matcher(html);
+                        while (m.find()) {
+
+                            w.write(m.group(1) + ", ");
+
+                            System.out.print(m.group(1) + ", ");
+                        }
+
                     }
-                    p = Pattern.compile("Характер.*span.*id.*>\\s*(-?\\d\\.?\\d?\\d?)\\s*<.*голос");
-                    m = p.matcher(html);
-                    while (m.find()) {
-                        System.out.print(m.group(1) + ", ");
-                    }
-                    p = Pattern.compile("Качество.*span.*id.*>\\s*(-?\\d\\.?\\d?\\d?)\\s*<.*голос");
-                    m = p.matcher(html);
-                    while (m.find()) {
-                        System.out.print(m.group(1) + ", ");
-                    }
-                    p = Pattern.compile("Приём.*span.*id.*>\\s*(-?\\d\\.?\\d?\\d?)\\s*<.*голос");
-                    m = p.matcher(html);
-                    while (m.find()) {
-                        System.out.print(m.group(1) + ", ");
-                    }
-                    p = Pattern.compile("Характер.*голос.*?(\\d+)");
-                    m = p.matcher(html);
-                    while (m.find()) {
-                        System.out.print(m.group(1) + ", ");
-                    }
-                    p = Pattern.compile("Качество.*голос.*?(\\d+)");
-                    m = p.matcher(html);
-                    while (m.find()) {
-                        System.out.print(m.group(1) + ", ");
-                    }
-                    p = Pattern.compile("Приём.*голос.*?(\\d+)");
-                    m = p.matcher(html);
-                    while (m.find()) {
-                        System.out.print(m.group(1) + ", ");
-                    }
+
+                    w.write(i + "\n");
+
+                    System.out.println(i);
+                    //client.close();
+                    TimeUnit.SECONDS.sleep(5);
 
                 }
-                System.out.println(i);
-                //client.close();
-                //TimeUnit.SECONDS.sleep(5);
-
             }
         }
 
         clientGlobal.close();
-}
+    }
 
 }
