@@ -1,10 +1,13 @@
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,9 +27,13 @@ public class MainApacheVersion {
 
             Pattern pGlobal = Pattern.compile("a href=/mephist\\\\prepods.nsf/id/(.*?) title=\"");
             Matcher mGlobal = pGlobal.matcher(htmlGlobal);
+            CloseableHttpClient client = HttpClients.createDefault();
+            ArrayList urlIDs = new ArrayList();
             while (mGlobal.find()) {
-                CloseableHttpClient client = HttpClients.createDefault();
-                HttpGet get = new HttpGet("http://www.mephist.ru/mephist/prepods.nsf/id/"+ mGlobal.group(1));
+                urlIDs.add(mGlobal.group(1));
+            }
+            for (int i = 0; i < urlIDs.size(); i++) {
+                HttpGet get = new HttpGet("http://www.mephist.ru/mephist/prepods.nsf/id/"+ urlIDs.get(i));
                 try (CloseableHttpResponse resp = client.execute(get)) {
                     String html = EntityUtils.toString(resp.getEntity());
                     //System.out.print(html);
@@ -65,11 +72,14 @@ public class MainApacheVersion {
                     p = Pattern.compile("Приём.*голос.*?(\\d+)");
                     m = p.matcher(html);
                     while (m.find()) {
-                        System.out.println(m.group(1));
+                        System.out.print(m.group(1) + ", ");
                     }
+
                 }
-                client.close();
-               // TimeUnit.SECONDS.sleep(1);
+                System.out.println(i);
+                //client.close();
+                //TimeUnit.SECONDS.sleep(5);
+
             }
         }
 
